@@ -1,4 +1,10 @@
 import sys
+from param import (
+    PUBLIC_API_URL,
+    DATATABLES_URL,
+    HISTORICAL_URL,
+    RSS_URL,
+    FINANCE_TABLES)
 import urllib
 import http.client
 
@@ -6,19 +12,6 @@ try:
     import simplejson as json
 except ImportError:
     import json
-
-PUBLIC_API_URL = 'http://query.yahooapis.com/v1/public/yql'
-DATATABLES_URL = 'store://datatables.org/alltableswithkeys'
-HISTORICAL_URL = 'http://ichart.finance.yahoo.com/table.csv?s='
-RSS_URL = 'http://finance.yahoo.com/rss/headline?s='
-RSS_URL2 = 'http://tw.stock.yahoo.com/rss/q/2017+%E9%B4%BB%E6%B5%B7?ei=UTF-8'
-FINANCE_TABLES = {
-    'quotes': 'yahoo.finance.quotes',
-    'options': 'yahoo.finance.options',
-    'quoteslist': 'yahoo.finance.quoteslist',
-    'sectors': 'yahoo.finance.sectors',
-    'industry': 'yahoo.finance.industry'
-}
 
 
 class YQLQuery(object):
@@ -91,24 +84,11 @@ class StockRetriever(YQLQuery):
         del results['query']['results']['row'][0]
         return results['query']['results']['row']
 
-    def get_chinese_news_feed(self, symbol):
-        """Retrieves the rss feed for the provided symbol."""
-
-        feedUrl = RSS_URL2 + symbol
-        yql = 'select title, link, description, pubDate from rss' \
-              'where url=\'%s\'' % feedUrl
-        response = super(StockRetriever, self).execute(yql)
-        result = response['query']['results']['item'][0]['title']
-        if result.find('not found') > 0:
-            raise QueryError('Feed for %s does not exist.' % symbol)
-        else:
-            return response['query']['results']['item']
-
     def get_news_feed(self, symbol):
         """Retrieves the rss feed for the provided symbol."""
 
         feedUrl = RSS_URL + symbol
-        yql = 'select title, link, description, pubDate from rss' \
+        yql = 'select title, link, description, pubDate from rss ' \
               'where url=\'%s\'' % feedUrl
         response = super(StockRetriever, self).execute(yql)
         result = response['query']['results']['item'][0]['title']
