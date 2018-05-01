@@ -12,16 +12,16 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../lib/'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'stock_analysis'
-copyright = '2018, pinglin'
-author = 'pinglin'
+copyright = '2018, Ping-Lin'
+author = 'Ping-Lin'
 
 # The short X.Y version
 version = ''
@@ -103,7 +103,14 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
+html_sidebars = {
+    '**': [
+        'sidebarintro.html',
+        'localtoc.html',
+        'relations.html',
+        'searchbox.html'
+    ],
+}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -137,7 +144,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'stock_analysis.tex', 'stock\\_analysis Documentation',
-     'pinglin', 'manual'),
+     'Ping-Lin', 'manual'),
 ]
 
 
@@ -174,3 +181,5 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+html_show_sphinx = False
