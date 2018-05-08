@@ -45,18 +45,20 @@ class DBWrapper(object):
         """
         Args:
             table_name (string): table name
-            pk (string): primary key, use title and md5 hash
             attr_list (list): table header
 
         >>> with DBWrapper() as db:
         ...     table_name = "yahoo_news"
         ...     attr_list = ["description", "contents"]
         ...     db.create_table(table_name, attr_list)
+
+        this will create table name "yahoo_news" and
+        column ["id", "description", "contents"]
         """
         attr_list = ["id PRIMARY KEY"] + attr_list
         str_attr = ",".join(attr_list)
         try:
-            sql = '''CREATE TABLE {} ({})'''.format(
+            sql = '''CREATE TABLE IF NOT EXISTS {} ({})'''.format(
                     table_name, str_attr)
             self._cursor.execute(sql)
         except sqlite3.Error as e:
@@ -67,11 +69,13 @@ class DBWrapper(object):
 
     def insert_data(self, table_name, attr_list, values_list):
         """
+        auto add primary key, default gen from title
         """
         for i in range(len(values_list)):
             primary_key = self._get_hash(values_list[i][0])
             values_list[i] = [primary_key] + values_list[i]
 
+        attr_list = ["id"] + attr_list
         str_attr = ",".join(attr_list)
         try:
             sql = "INSERT OR IGNORE INTO {} ({}) VALUES".format(

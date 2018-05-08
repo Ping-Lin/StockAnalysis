@@ -19,7 +19,7 @@ stocks = ChineseStockRetriever()
 
 with DBWrapper("news.db") as db:
     table_name = "yahoo_news"
-    attr_list = ["ids", "title", "description", "link", "pubDate", "allNews"]
+    attr_list = ["title", "description", "link", "pubDate", "allNews"]
     db.create_table(table_name, attr_list)
     try:
         '''
@@ -33,7 +33,7 @@ with DBWrapper("news.db") as db:
 
         for newsitems in news:
             values = list()
-            for attr in attr_list[1: -1]:
+            for attr in attr_list[0: -1]:
                 if newsitems[attr]:
                     values.append(newsitems[attr])
                 else:

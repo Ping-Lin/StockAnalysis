@@ -6,24 +6,31 @@ from param import (
     RSS_CH_STOCK_SEARCH_URL,
     RSS_CH_NEWS_SEARCH_URL,
 )
+from utils.encoding import encoding_transform
 from urllib.parse import quote
 import urllib.request
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
+import re
 
 
-def encoding_transform(data, enc='latin1', type_encode='strict', dec='big5'):
-    try:
-        data = str(data).encode(enc, type_encode).decode(dec)
-    except UnicodeEncodeError as e:
-        # print("encode error: {}, {}...", e, data[0:30])
-        pass
-    except UnicodeDecodeError as e:
-        # print("decode error: {}, {}...", e, data[0:30])
-        pass
-    except UnicodeError as e:
-        # print("unicode error: {}, {}...", e, data[0:30])
-        pass
-    return data
+def article_filter(soup_ret_element):
+    if re.match('<!--文章 start-->.*<!--文章 end-->',
+                encoding_transform(str(soup_ret_element))):
+        return True
+    else:
+        return False
+
+
+def is_begin_tag(text):
+    """Identify the start comment"""
+    return (isinstance(text, Comment) and
+            text.strip().startswith("文章 start"))
+
+
+def is_end_tag(text):
+    """Identify the end comment"""
+    return (isinstance(text, Comment) and
+            text.strip().startswith("文章 end"))
 
 
 class ChineseStockRetriever(StockRetriever):
@@ -64,7 +71,12 @@ class ChineseStockRetriever(StockRetriever):
         if result == 0:
             raise QueryError('Feed for %s does not exist.' % feeds)
         else:
-            return response['query']['results']['item']
+            result_list = response['query']['results']['item']
+            finally_result_list = list()
+            for r in result_list:
+                _ = {k: encoding_transform(v) for k, v in r.items()}
+                finally_result_list.append(_)
+            return finally_result_list
 
     def get_all_news(self, url):
         url = encoding_transform(url)
@@ -72,11 +84,21 @@ class ChineseStockRetriever(StockRetriever):
         with urllib.request.urlopen(url) as f:
             html_doc = f.read()
             soup = BeautifulSoup(html_doc, 'html.parser')
-            ret = soup.find_all('p')
-            # change encode to BIG5
-            ret = [encoding_transform(str(_.text), type_encode='ignore')
-                   for _ in ret]
-            return " ".join(ret)
+
+            result = ""
+            for instance_begin_tag in soup.find_all(text=is_begin_tag):
+                # We found a start comment, look at all text and comments:
+                for text in instance_begin_tag.find_all_next(text=True):
+                    text = encoding_transform(text)
+                    if is_end_tag(text):
+                        break
+                    if isinstance(text, Comment):
+                        continue
+                    if not text.strip():
+                        continue
+                    result += text
+
+            return result
 
 
 # stocks = ChineseStockRetriever()
