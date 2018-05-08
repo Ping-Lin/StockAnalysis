@@ -12,4 +12,8 @@ FINANCE_TABLES = {
 }
 
 # for chineseStockRetriever.py use
-RSS_CH_SEARCH_URL = 'http://tw.stock.yahoo.com/rss/q/'
+RSS_CH_STOCK_SEARCH_URL = 'http://tw.stock.yahoo.com/rss/q/'
+
+# this will be N1.html N2.html ...
+# reference: https://tw.finance.yahoo.com/rss_index.html#listings
+RSS_CH_NEWS_SEARCH_URL = 'https://tw.finance.yahoo.com/rss/url/d/e/N'

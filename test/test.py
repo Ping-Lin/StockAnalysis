@@ -1,28 +1,52 @@
-from chinese_stockretriever import ChineseStockRetriever
 from stockretriever import QueryError
+from modules.chinese_stockretriever import ChineseStockRetriever
+from modules.db_wrapper import DBWrapper
+import inspect
+
+
+def print_error(e, error_string):
+    # 0 represents this line
+    # 1 represents line at caller
+    callerframerecord = inspect.stack()[1]
+    frame = callerframerecord[0]
+    info = inspect.getframeinfo(frame)
+
+    print("{}: {}\nFile: \"{}\", line: {}, in {}"
+          .format(error_string, e, info.filename, info.lineno, info.function))
+
 
 stocks = ChineseStockRetriever()
 
-symbols = "2017+%E9%B4%BB%E6%B5%B7?ei=UTF-8"
+with DBWrapper("news.db") as db:
+    table_name = "yahoo_news"
+    attr_list = ["ids", "title", "description", "link", "pubDate", "allNews"]
+    db.create_table(table_name, attr_list)
+    try:
+        '''
+        gets news articles related to symbol, returns a dictionary,
+        it have printed title and description below in the for loop
+        the dictionary has the following fields:
+        title, link, description, pubDate
+        '''
+        news = stocks.get_all_chinese_important_news_feed()
+        values_list = list()
 
-try:
-    '''
-    gets news articles related to symbol, returns a dictionary,
-    it have printed title and description below in the for loop
-    the dictionary has the following fields: title, link, description, pubDate
-    '''
-    news = stocks.get_chinese_news_feed(symbols)
-    for newsitems in news:
-        title = ''
-        desc = ''
-        if newsitems['title']:
-            print('TITLE: ', newsitems['title'])
-            title = newsitems['title'] + ' '
-        else:
-            title = ''
+        for newsitems in news:
+            values = list()
+            for attr in attr_list[1: -1]:
+                if newsitems[attr]:
+                    values.append(newsitems[attr])
+                else:
+                    break
+            else:
+                # if every data get, add into db
+                try:
+                    values.append(stocks.get_all_news(newsitems['link']))
+                except Exception as e:
+                    print_error(e, "get all news fail")
+                    continue
+                values_list.append(values)
 
-        if newsitems['description']:
-            print('DESCRP: ', newsitems['description'])
-            desc = newsitems['description']
-except QueryError as e:
-    print('couldnt get yahoo feed.\nreason: %s' % e)
+        db.insert_data(table_name, attr_list, values_list)
+    except QueryError as e:
+        print('couldnt get yahoo feed.\nreason: %s' % e)
