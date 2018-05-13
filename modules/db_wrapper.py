@@ -8,6 +8,7 @@
 import sqlite3
 import inspect
 import hashlib
+import logging
 
 
 class DBWrapper(object):
@@ -38,8 +39,9 @@ class DBWrapper(object):
         frame = callerframerecord[0]
         info = inspect.getframeinfo(frame)
 
-        print("sqlite3 error occurred: {}\nFile: \"{}\", line: {}, in {}"
-              .format(e.args[0], info.filename, info.lineno, info.function))
+        logging.error("sqlite3 error occurred: {}\
+                       \nFile: \"{}\", line: {}, in {}\n".format(
+                       e.args[0], info.filename, info.lineno, info.function))
 
     def create_table(self, table_name, attr_list):
         """
@@ -87,10 +89,41 @@ class DBWrapper(object):
         except sqlite3.Error as e:
             self._print_error(e)
 
-    def get_data_from_name(self, table_name, attr_list, name):
+    def update_time_data(self, table_name, new_value, idname):
+        """ One use function
+        from datetime import datetime
+        ...: with DBWrapper("news.db") as db:
+        ...:     table_name = "yahoo_news"
+        ...:     attr_list = ["id", "pubDate"]
+        ...:     data_list = db.get_data_from_attr(table_name, attr_list)
+        ...:     for item in data_list:
+        ...:         idname = item[0]
+        ...:         strtime = item[1]
+        ...:         datetime_object = datetime.strptime(strtime,
+                                                         '%a, %d %b %Y %X %Z')
+        ...:         print(idname, strtime, datetime_object.timestamp())
+        ...:         db.update_time_data(table_name,
+                                         int(datetime_object.timestamp()),
+                                         idname)
+        ...:     print(len(data_list))
+        """
+        try:
+            task = (new_value, idname)
+            sql = "UPDATE yahoo_news SET pubDate = ? WHERE id = ?"
+            self._cursor.execute(sql, task)
+        except sqlite3.Error as e:
+            self._print_error(e)
+
+    def get_data_from_attr(self, table_name, attr_list):
+        """
+        FIXME
+        now get all the data in the memory, because datas are small now
+        here can change future
+        """
         str_attr = ",".join(attr_list)
         try:
-            sql = "SELECT {} from {}".format(str_attr, table_name)
+            sql = "SELECT {} from {}".format(
+                   str_attr, table_name)
             self._cursor.execute(sql)
             data_list = list()
             for row in self._cursor:
@@ -99,3 +132,50 @@ class DBWrapper(object):
             return data_list
         except sqlite3.Error as e:
             self._print_error(e)
+
+    def get_data_by_time(self, table_name, start, end, attr="pubDate"):
+        """Ex: SELECT * from yahoo_news where pubDate > 1526196605"""
+        try:
+            sql = "SELECT * from {} where {} >= {} and {} < {}".format(
+                   table_name, attr, start, attr, end)
+            self._cursor.execute(sql)
+            data_list = list()
+            for row in self._cursor:
+                data_list.append(row)
+                logging.debug(row)
+            return data_list
+        except sqlite3.Error as e:
+            self._print_error(e)
+
+    def get_count_query_by_time(self,
+                                table_name,
+                                query_list,
+                                start,
+                                end,
+                                attr="pubDate",
+                                query_col="all"):
+        data_list = self.get_data_by_time(table_name, start, end, attr)
+
+        def get_attr_list(query_col_string):
+            # map to database col number
+            array_num_list = list()
+            if "all" in query_col_string.lower():
+                array_num_list = [1, 2, 5] + array_num_list
+            else:
+                if "title" in query_col_string.lower():
+                    array_num_list.append(1)
+                if "desc" in query_col_string.lower():
+                    array_num_list.append(2)
+                if "allnews" in query_col_string.lower():
+                    array_num_list.append(5)
+            return array_num_list
+
+        count = 0
+        for data in data_list:
+            wanted_col = [data[i] for i in get_attr_list(query_col)]
+            for _ in wanted_col:
+                logging.debug(_)
+                logging.debug("-----------")
+                for q in query_list:
+                    count += str(_).count(q)
+        return count

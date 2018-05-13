@@ -100,7 +100,6 @@ class ChineseStockRetriever(StockRetriever):
 
             return result
 
-
 # stocks = ChineseStockRetriever()
 # r = stocks.get_all_chinese_important_news_feed()
 # stocks.get_all_news(r[0]['link'])
