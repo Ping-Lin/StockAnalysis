@@ -153,13 +153,13 @@ class DBWrapper(object):
                                 start,
                                 end,
                                 attr="pubDate",
-                                query_col="all"):
+                                query_col="allnews"):
         data_list = self.get_data_by_time(table_name, start, end, attr)
 
         def get_attr_list(query_col_string):
             # map to database col number
             array_num_list = list()
-            if "all" in query_col_string.lower():
+            if "all" == query_col_string.lower():
                 array_num_list = [1, 2, 5] + array_num_list
             else:
                 if "title" in query_col_string.lower():

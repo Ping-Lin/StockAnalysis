@@ -35,7 +35,7 @@ def example_of_get_count_query_by_time():
                         query_list,
                         start,
                         end,
-                        query_col="title"
+                        query_col="title"   # default is allnews
                     )
             print("count of {}: {}".format(query_list, count))
         except Exception as e:
