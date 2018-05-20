@@ -45,6 +45,8 @@ class DBWrapper(object):
 
     def create_table(self, table_name, attr_list):
         """
+        create table name with attr_list
+
         Args:
             table_name (string): table name
             attr_list (list): table header
@@ -71,7 +73,28 @@ class DBWrapper(object):
 
     def data_insert(self, table_name, attr_list, values_list):
         """
-        auto add primary key, default gen from title
+        insert data into table_name with attr_list and values_list
+        auto add primary key (id), default gen from first value of attributes
+        (gen method: hashlib.md5)
+
+        Args:
+            table_name (string): table name
+            attr_list (list): table header
+            values_list (list): list of values list you want to insert
+
+        >>> with DBWrapper() as db:
+        ...     table_name = "yahoo_news"
+        ...     attr_list = ["title", "description"]
+        ...     values_list = [["Hello", "hello world"],
+        ...                    ["Marry", "Marry me"]]
+        ...     db.data_insert(table_name, attr_list, values_list)
+
+        this will add data
+        ["8b1a9953c4611296a827abf8c47804d7", "Hello", "hello world"]
+        ["fd50a6e193cab17e500275acb1c0a4aa", "Marry", "Marry me"]
+        into "yahoo_news" table
+
+        (ie: first value is gen from hashlib.md5("Hello"))
         """
         for i in range(len(values_list)):
             primary_key = self._get_hash(values_list[i][0])
@@ -117,6 +140,17 @@ class DBWrapper(object):
     def get_table_attrs_list(self, table_name):
         """
         get attribute header list
+
+        Args:
+            table_name (string): table name
+
+        Returns:
+            a list of table attrs
+
+        >>> with DBWrapper() as db:
+        ...     table_name = "yahoo_news"
+        ...     db.get_table_attrs_list(table_name)
+        >>>     ['id', 'title', 'description', 'link', 'pubDate', 'allNews']
         """
         try:
             sql = "SELECT * FROM {}".format(table_name)
@@ -128,9 +162,24 @@ class DBWrapper(object):
 
     def get_data_from_attr(self, table_name, attr_list):
         """
-        FIXME
+        get data from specific attrs list
+
+        *** FIXME ***
         now get all the data in the memory, because datas are small now
         here can change future
+
+        Args:
+            table_name (string): table name
+            attr_list (list): table header
+
+        Returns:
+            a list of data list
+
+        >>> with DBWrapper() as db:
+        ...     table_name = "yahoo_news"
+        ...     attr_list = db.get_table_attrs_list(table_name)
+        ...     data_list = db.get_data_from_attr(table_name, attr_list)
+        >>>[["xxxx", "yyyy", ...], [...]]
         """
         str_attr = ",".join(attr_list)
         try:
@@ -146,7 +195,33 @@ class DBWrapper(object):
             self._print_error(e)
 
     def get_data_by_time(self, table_name, start, end, attr="pubDate"):
-        """Ex: SELECT * from yahoo_news where pubDate > 1526196605"""
+        """
+        get data from all attrs from start time to end time
+        This is a wrapper function for easy using
+
+        *** FIXME ***
+        now get all the data in the memory, because datas are small now
+        here can change future
+
+        eg: SELECT * from yahoo_news where pubDate > 1526196605
+
+        Args:
+            table_name (string): table name
+            start (*): compare value, eg: unix time stamp
+            end (*): compare value, eg: unix time stamp
+            attr (string): column you want to compare between start and end,
+                           default: "pubDate"
+
+        Returns:
+            a list of data list
+
+        >>> with DBWrapper() as db:
+        ...     table_name = "yahoo_news"
+        ...     start = "1526196605"
+        ...     end = "1526197778"
+        ...     data_list = db.get_data_by_time(table_name, start, end)
+        """
+
         try:
             sql = "SELECT * from {} where {} >= {} and {} < {}".format(
                    table_name, attr, start, attr, end)
@@ -166,6 +241,37 @@ class DBWrapper(object):
                                 end,
                                 attr="pubDate",
                                 query_col="allnews"):
+        """
+        get count of appearance from query list, this will call
+        get_data_by_time()
+        This is a wrapper function for easy using
+
+        Args:
+            table_name (string): table name
+            query_list (list): list of query words
+            start (*): compare value, eg: unix time stamp
+            end (*): compare value, eg: unix time stamp
+            attr (string): column you want to compare between start and end
+                           default: "pubDate"
+            query_col (string): can be "all", "title", "desc" or "allnews"
+                                default: "allnews"
+
+        Returns:
+            a number of count
+
+        >>> with DBWrapper() as db:
+        ...     table_name = "yahoo_news"
+        ...     query_list = ["金融", "觀察"]
+        ...     start = "1526196605"
+        ...     end = "1526197778"
+        ...     count = db.get_count_query_by_time(
+        ...                    table_name,
+        ...                    query_list,
+        ...                    start,
+        ...                    end,
+        ...                    query_col="title"   # default is allnews
+        ...             )
+        """
         data_list = self.get_data_by_time(table_name, start, end, attr)
 
         def get_attr_list(query_col_string):
