@@ -114,6 +114,18 @@ class DBWrapper(object):
         except sqlite3.Error as e:
             self._print_error(e)
 
+    def get_table_attrs_list(self, table_name):
+        """
+        get attribute header list
+        """
+        try:
+            sql = "SELECT * FROM {}".format(table_name)
+            self._cursor.execute(sql)
+            attrs_list = [d[0] for d in self._cursor.description]
+            return attrs_list
+        except sqlite3.Error as e:
+            self._print_error(e)
+
     def get_data_from_attr(self, table_name, attr_list):
         """
         FIXME
@@ -122,7 +134,7 @@ class DBWrapper(object):
         """
         str_attr = ",".join(attr_list)
         try:
-            sql = "SELECT {} from {}".format(
+            sql = "SELECT {} FROM {}".format(
                    str_attr, table_name)
             self._cursor.execute(sql)
             data_list = list()
