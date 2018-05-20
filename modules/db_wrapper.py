@@ -69,7 +69,7 @@ class DBWrapper(object):
     def _get_hash(self, text):
         return hashlib.md5(text.encode()).hexdigest()
 
-    def insert_data(self, table_name, attr_list, values_list):
+    def data_insert(self, table_name, attr_list, values_list):
         """
         auto add primary key, default gen from title
         """
@@ -89,7 +89,7 @@ class DBWrapper(object):
         except sqlite3.Error as e:
             self._print_error(e)
 
-    def update_time_data(self, table_name, new_value, idname):
+    def data_update_time(self, table_name, new_value, idname):
         """ One use function
         from datetime import datetime
         ...: with DBWrapper("news.db") as db:
@@ -102,7 +102,7 @@ class DBWrapper(object):
         ...:         datetime_object = datetime.strptime(strtime,
                                                          '%a, %d %b %Y %X %Z')
         ...:         print(idname, strtime, datetime_object.timestamp())
-        ...:         db.update_time_data(table_name,
+        ...:         db.data_update_time(table_name,
                                          int(datetime_object.timestamp()),
                                          idname)
         ...:     print(len(data_list))

@@ -49,7 +49,7 @@ def main():
                         continue
                     values_list.append(values)
 
-            db.insert_data(table_name, attr_list, values_list)
+            db.data_insert(table_name, attr_list, values_list)
         except QueryError as e:
             print('couldnt get yahoo feed.\nreason: %s' % e)
 
