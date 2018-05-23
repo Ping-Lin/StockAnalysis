@@ -189,7 +189,7 @@ class DBWrapper(object):
             self._cursor.execute(sql)
             data_list = list()
             for row in self._cursor:
-                data_list.append(row)
+                data_list.append(list(row))
 
             return data_list
         except sqlite3.Error as e:
@@ -232,8 +232,8 @@ class DBWrapper(object):
             self._cursor.execute(sql)
             data_list = list()
             for row in self._cursor:
-                data_list.append(row)
-                logging.debug(row)
+                data_list.append(list(row))
+                logging.debug(list(row))
             return data_list
         except sqlite3.Error as e:
             self._print_error(e)
