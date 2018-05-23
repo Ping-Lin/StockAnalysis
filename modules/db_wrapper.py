@@ -47,9 +47,9 @@ class DBWrapper(object):
         """
         create table name with attr_list
 
-        Args:
-            table_name (string): table name
-            attr_list (list): table header
+        :Args:
+            |  table_name (string): table name
+            |  attr_list (list): table header
 
         >>> with DBWrapper() as db:
         ...     table_name = "yahoo_news"
@@ -73,14 +73,14 @@ class DBWrapper(object):
 
     def data_insert(self, table_name, attr_list, values_list):
         """
-        insert data into table_name with attr_list and values_list
-        auto add primary key (id), default gen from first value of attributes
-        (gen method: hashlib.md5)
+        |  insert data into table_name with attr_list and values_list
+        |  auto add primary key (id), default gen from first value of attributes
+        |  (gen method: hashlib.md5)
 
-        Args:
-            table_name (string): table name
-            attr_list (list): table header
-            values_list (list): list of values list you want to insert
+        :Args:
+            |  table_name (string): table name
+            |  attr_list (list): table header
+            |  values_list (list): list of values list you want to insert
 
         >>> with DBWrapper() as db:
         ...     table_name = "yahoo_news"
@@ -89,10 +89,9 @@ class DBWrapper(object):
         ...                    ["Marry", "Marry me"]]
         ...     db.data_insert(table_name, attr_list, values_list)
 
-        this will add data
-        ["8b1a9953c4611296a827abf8c47804d7", "Hello", "hello world"]
-        ["fd50a6e193cab17e500275acb1c0a4aa", "Marry", "Marry me"]
-        into "yahoo_news" table
+        |  this will add data into "yahoo_news" table
+        |  ["8b1a9953c4611296a827abf8c47804d7", "Hello", "hello world"]
+        |  ["fd50a6e193cab17e500275acb1c0a4aa", "Marry", "Marry me"]
 
         (ie: first value is gen from hashlib.md5("Hello"))
         """
@@ -113,22 +112,25 @@ class DBWrapper(object):
             self._print_error(e)
 
     def data_update_time(self, table_name, new_value, idname):
-        """ One use function
-        from datetime import datetime
-        ...: with DBWrapper("news.db") as db:
-        ...:     table_name = "yahoo_news"
-        ...:     attr_list = ["id", "pubDate"]
-        ...:     data_list = db.get_data_from_attr(table_name, attr_list)
-        ...:     for item in data_list:
-        ...:         idname = item[0]
-        ...:         strtime = item[1]
-        ...:         datetime_object = datetime.strptime(strtime,
-                                                         '%a, %d %b %Y %X %Z')
-        ...:         print(idname, strtime, datetime_object.timestamp())
-        ...:         db.data_update_time(table_name,
-                                         int(datetime_object.timestamp()),
-                                         idname)
-        ...:     print(len(data_list))
+        """
+        One use function
+
+        >>> from datetime import datetime
+        ...     with DBWrapper("news.db") as db:
+        ...         table_name = "yahoo_news"
+        ...         attr_list = ["id", "pubDate"]
+        ...         data_list = db.get_data_from_attr(table_name, attr_list)
+        ...         for item in data_list:
+        ...             idname = item[0]
+        ...             strtime = item[1]
+        ...             datetime_object = datetime.strptime(strtime,
+                                                            '%a, %d %b %Y %X %Z')
+        ...             print(idname, strtime, datetime_object.timestamp())
+        ...             db.data_update_time(table_name,
+                                            int(datetime_object.timestamp()),
+                                            idname)
+        ...         print(len(data_list))
+
         """
         try:
             task = (new_value, idname)
@@ -141,11 +143,11 @@ class DBWrapper(object):
         """
         get attribute header list
 
-        Args:
-            table_name (string): table name
+        :Args:
+            |  table_name (string): table name
 
-        Returns:
-            a list of table attrs
+        :Returns:
+            |  a list of table attrs
 
         >>> with DBWrapper() as db:
         ...     table_name = "yahoo_news"
@@ -164,16 +166,15 @@ class DBWrapper(object):
         """
         get data from specific attrs list
 
-        *** FIXME ***
-        now get all the data in the memory, because datas are small now
-        here can change future
+        |  *** FIXME ***
+        |  now get all the data in the memory, because datas are small now
 
-        Args:
-            table_name (string): table name
-            attr_list (list): table header
+        :Args:
+            |  table_name (string): table name
+            |  attr_list (list): table header
 
-        Returns:
-            a list of data list
+        :Returns:
+            |  a list of data list
 
         >>> with DBWrapper() as db:
         ...     table_name = "yahoo_news"
@@ -196,24 +197,27 @@ class DBWrapper(object):
 
     def get_data_by_time(self, table_name, start, end, attr="pubDate"):
         """
-        get data from all attrs from start time to end time
-        This is a wrapper function for easy using
+        |  get data from all attrs from start time to end time
+        |  This is a wrapper function for easy using
 
-        *** FIXME ***
-        now get all the data in the memory, because datas are small now
-        here can change future
+        |  *** FIXME ***
+        |  1. change to get attr list not 'select *'
+        |  2. now get all the data in the memory, because datas are small now
+            here can change future
 
         eg: SELECT * from yahoo_news where pubDate > 1526196605
 
-        Args:
-            table_name (string): table name
-            start (*): compare value, eg: unix time stamp
-            end (*): compare value, eg: unix time stamp
-            attr (string): column you want to compare between start and end,
-                           default: "pubDate"
+        :Args:
+            |  table_name (string): table name
+            |  start (*): compare value, eg: unix time stamp
+            |  end (*): compare value, eg: unix time stamp
 
-        Returns:
-            a list of data list
+        :Kwargs:
+            |  attr (string): column you want to compare between start and end,
+                default -> "pubDate"
+
+        :Returns:
+            |  a list of data list
 
         >>> with DBWrapper() as db:
         ...     table_name = "yahoo_news"
@@ -242,22 +246,25 @@ class DBWrapper(object):
                                 attr="pubDate",
                                 query_col="allnews"):
         """
-        get count of appearance from query list, this will call
-        get_data_by_time()
+        |  get count of appearance from query list, this will call
+           get_data_by_time()
+
         This is a wrapper function for easy using
 
-        Args:
-            table_name (string): table name
-            query_list (list): list of query words
-            start (*): compare value, eg: unix time stamp
-            end (*): compare value, eg: unix time stamp
-            attr (string): column you want to compare between start and end
-                           default: "pubDate"
-            query_col (string): can be "all", "title", "desc" or "allnews"
-                                default: "allnews"
+        :Args:
+            |  table_name (string): table name
+            |  query_list (list): list of query words
+            |  start (): compare value, eg: unix time stamp
+            |  end (): compare value, eg: unix time stamp
 
-        Returns:
-            a number of count
+        :Kwargs:
+            |  attr (string): column you want to compare between start and end
+                , default: "pubDate"
+            |  query_col (string): can be "all", "title", "desc" or "allnews"
+                , default: "allnews"
+
+        :Returns:
+            |  a number of count
 
         >>> with DBWrapper() as db:
         ...     table_name = "yahoo_news"
